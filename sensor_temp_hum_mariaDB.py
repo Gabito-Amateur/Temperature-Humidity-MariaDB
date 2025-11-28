@@ -109,3 +109,5 @@ font = pygame.font.Font(None, 36)
 if __name__ == "__main__":
     temp, hum = None, None  # Inicializa las variables de temperatura y humedad
     main()
+
+
