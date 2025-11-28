@@ -27,20 +27,35 @@ def get_sensor_data():
 # Función que muestra los datos en la ventana de Pygame
 def display_data():
     screen.fill(BACKGROUND_COLOR)  # Limpia la pantalla
-    if temp is not None and hum is not None:
-        # Muestra los valores de temperatura y humedad en la ventana
-        temp_text = font.render("Temp: {}C".format(temp), True, TEXT_COLOR)
-        hum_text = font.render("Humidity: {}%".format(hum), True, TEXT_COLOR)
 
-        # Dibujar los textos en la ventana
+    # Lecturas actuales
+    if temp is not None and hum is not None:
+        temp_text = font.render(f"Temp: {temp}C", True, TEXT_COLOR)
+        hum_text = font.render(f"Humidity: {hum}%", True, TEXT_COLOR)
+
         screen.blit(temp_text, (50, 50))
         screen.blit(hum_text, (50, 100))
     else:
-        # Si no hay datos, muestra un mensaje de error
         error_text = font.render("Error al leer el sensor.", True, (255, 0, 0))
         screen.blit(error_text, (50, 50))
 
+    # Valores máximos/mínimos del día
+    data = get_daily_min_max()
+    if data:
+        maxmin_text1 = font.render(
+            f"Max Temp: {data['max_temp']}C  Min Temp: {data['min_temp']}C",
+            True, (0, 0, 120)
+        )
+        maxmin_text2 = font.render(
+            f"Max Hum: {data['max_hum']}%  Min Hum: {data['min_hum']}%",
+            True, (0, 0, 120)
+        )
+
+        screen.blit(maxmin_text1, (50, 170))
+        screen.blit(maxmin_text2, (50, 210))
+
     pygame.display.flip()  # Actualiza la pantalla
+
 
 def save_to_db(temperatura, humedad):
     try:
@@ -60,6 +75,42 @@ def save_to_db(temperatura, humedad):
         print("Datos guardados en MariaDB")
     except MySQLdb.Error as e:
         print("Error al guardar en la BD:", e)
+
+def get_daily_min_max():
+    try:
+        conexion = MySQLdb.connect(
+            host="localhost",
+            user="raspiuser",
+            passwd="1234",
+            db="sensores"
+        )
+        cursor = conexion.cursor()
+
+        query = """
+            SELECT 
+                MAX(temperatura),
+                MIN(temperatura),
+                MAX(humedad),
+                MIN(humedad)
+            FROM dht11
+            WHERE DATE(fecha) = CURDATE();
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+        conexion.close()
+
+        max_temp, min_temp, max_hum, min_hum = result
+
+        return {
+            "max_temp": max_temp,
+            "min_temp": min_temp,
+            "max_hum": max_hum,
+            "min_hum": min_hum
+        }
+
+    except MySQLdb.Error as e:
+        print("Error al consultar máximos/mínimos:", e)
+        return None
 
 
 # Función principal
