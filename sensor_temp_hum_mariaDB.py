@@ -3,6 +3,8 @@ import pygame
 import time
 import threading
 from grovepi import *
+import MySQLdb
+
 
 #------------------Funciones-----------------
 
@@ -14,6 +16,7 @@ def get_sensor_data():
             # Lee los valores de temperatura y humedad
             [temp, hum] = dht(dht_sensor_port, 0)  # Cambia a 1 si usas un DHT11
             print("Temp = {}C \t Humidity = {}%".format(temp, hum))
+            save_to_db(temp, hum)  # Guarda los datos en la base de datos
         except (IOError, TypeError) as e:
             print("Error en la lectura del sensor:", e)
             temp, hum = None, None  # En caso de error, ponemos los valores como None
@@ -38,6 +41,26 @@ def display_data():
         screen.blit(error_text, (50, 50))
 
     pygame.display.flip()  # Actualiza la pantalla
+
+def save_to_db(temperatura, humedad):
+    try:
+        conexion = MySQLdb.connect(
+            host="localhost",
+            user="raspiuser",
+            passwd="1234",
+            db="sensores"
+        )
+        cursor = conexion.cursor()
+        cursor.execute(
+            "INSERT INTO dht11 (temperatura, humedad) VALUES (%s, %s)",
+            (temperatura, humedad)
+        )
+        conexion.commit()
+        conexion.close()
+        print("Datos guardados en MariaDB")
+    except MySQLdb.Error as e:
+        print("Error al guardar en la BD:", e)
+
 
 # Función principal
 def main():
