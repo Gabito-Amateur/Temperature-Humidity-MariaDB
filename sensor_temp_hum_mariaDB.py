@@ -30,8 +30,8 @@ def display_data():
 
     # Lecturas actuales
     if temp is not None and hum is not None:
-        temp_text = font.render(f"Temp: {temp}C", True, TEXT_COLOR)
-        hum_text = font.render(f"Humidity: {hum}%", True, TEXT_COLOR)
+        temp_text = font.render("Temp: {}C".format(temp), True, TEXT_COLOR)
+        hum_text = font.render("Humidity: {}%".format(hum), True, TEXT_COLOR)
 
         screen.blit(temp_text, (50, 50))
         screen.blit(hum_text, (50, 100))
@@ -43,11 +43,12 @@ def display_data():
     data = get_daily_min_max()
     if data:
         maxmin_text1 = font.render(
-            f"Max Temp: {data['max_temp']}C  Min Temp: {data['min_temp']}C",
+            "Max Temp: {}C  Min Temp: {}C".format(data['max_temp'], data['min_temp']),
             True, (0, 0, 120)
         )
+
         maxmin_text2 = font.render(
-            f"Max Hum: {data['max_hum']}%  Min Hum: {data['min_hum']}%",
+            "Max Hum: {}%  Min Hum: {}%".format(data['max_hum'], data['min_hum']),
             True, (0, 0, 120)
         )
 
@@ -142,7 +143,7 @@ dht_sensor_port = 7  # Asegúrate de usar el puerto correcto
 pygame.init()
 
 # Dimensiones de la ventana
-WINDOW_WIDTH = 400
+WINDOW_WIDTH = 600
 WINDOW_HEIGHT = 300
 
 # Crear la ventana de Pygame
@@ -160,5 +161,4 @@ font = pygame.font.Font(None, 36)
 if __name__ == "__main__":
     temp, hum = None, None  # Inicializa las variables de temperatura y humedad
     main()
-
 
